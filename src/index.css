@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600;700&family=Fraunces:opsz,wght@9..144,300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-display: "Fraunces", serif;
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Colors */
+  --color-bg: #0A0906;
+  --color-surface-1: #111009;
+  --color-surface-2: #181510;
+  --color-surface-3: #211D15;
+
+  --color-border-soft: rgba(255, 255, 255, 0.06);
+  --color-border-medium: rgba(255, 255, 255, 0.10);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+
+  --color-glass-bg: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+
+  --color-amber-primary: #F5A623;
+  --color-amber-dim: rgba(245, 166, 35, 0.12);
+  --color-amber-glow: rgba(245, 166, 35, 0.25);
+  --color-amber-text: #FFC85A;
+
+  --color-risk: #FF4444;
+  --color-risk-dim: rgba(255, 68, 68, 0.12);
+
+  --color-watch: #FFB800;
+  --color-watch-dim: rgba(255, 184, 0, 0.12);
+
+  --color-safe: #34D399;
+  --color-safe-dim: rgba(52, 211, 153, 0.12);
+
+  --color-text-primary: #F2EDE4;
+  --color-text-secondary: #AAA192;
+  --color-text-tertiary: #6B5E4C;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .glass-1 {
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--color-glass-border);
+  }
+
+  .glass-frosted {
+    background: linear-gradient(to bottom-right,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.03));
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Commandment 7: The Zenith of Beauty - Subtle Shine */
+  .glass-shine::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 30%,
+        rgba(255, 255, 255, 0.07) 50%,
+        rgba(255, 255, 255, 0.03) 70%,
+        transparent 100%);
+    transform: rotate(-45deg);
+    pointer-events: none;
+  }
+
+  .glass-3 {
+    background: rgba(245, 166, 35, 0.08);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(245, 166, 35, 0.20);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+}
