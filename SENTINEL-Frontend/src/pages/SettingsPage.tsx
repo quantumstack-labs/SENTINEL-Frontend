@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -6,14 +8,52 @@ import { Label } from '@/components/ui/Label';
 import { Switch } from '@/components/ui/Switch';
 import { Slider } from '@/components/ui/Slider';
 import { cn } from '@/lib/utils';
-import { Bell, Shield, Users, CreditCard, Sliders, Plus } from 'lucide-react';
+import { Bell, Shield, Users, CreditCard, Sliders, Plus, Loader2 } from 'lucide-react';
 import { useTeamMembers } from '@/hooks/useData';
 import { Avatar } from '@/components/primitives/Avatar';
 import { Badge } from '@/components/primitives/Badge';
+import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('general');
   const { data: teamMembers, isLoading: teamLoading } = useTeamMembers();
+
+  const [workspaceName, setWorkspaceName] = useState('Engineering');
+  const [timezone, setTimezone] = useState('UTC');
+  const [threshold, setThreshold] = useState([85]);
+  const [includeDraftPrs, setIncludeDraftPrs] = useState(false);
+
+  const [criticalRisks, setCriticalRisks] = useState(true);
+  const [dailyBrief, setDailyBrief] = useState(true);
+  const [newDependencies, setNewDependencies] = useState(false);
+
+  const saveGeneralMutation = useMutation({
+    mutationFn: () =>
+      api.put('/workspace/settings', {
+        workspaceName,
+        timezone,
+        riskConfidenceThreshold: threshold[0],
+        includeDraftPrs,
+      }),
+    onSuccess: () => toast.success('Settings saved'),
+    onError: (err: Error) => toast.error(err.message ?? 'Failed to save settings'),
+  });
+
+  const saveNotificationsMutation = useMutation({
+    mutationFn: () =>
+      api.put('/workspace/settings', {
+        notifications: {
+          criticalRisks,
+          dailyBrief,
+          newDependencies,
+        },
+      }),
+    onSuccess: () => toast.success('Notification preferences saved'),
+    onError: (err: Error) => toast.error(err.message ?? 'Failed to save preferences'),
+  });
 
   const tabs = [
     { id: 'general', label: 'General', icon: Sliders },
@@ -26,7 +66,6 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col md:flex-row gap-8 min-h-[calc(100vh-140px)]">
-        {/* Settings Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0">
           <h1 className="font-display text-2xl text-text-primary mb-6">Settings</h1>
           <nav className="space-y-1">
@@ -48,7 +87,6 @@ export default function SettingsPage() {
           </nav>
         </aside>
 
-        {/* Content Area */}
         <div className="flex-1 max-w-2xl">
           {activeTab === 'general' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -61,14 +99,18 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Workspace Name</Label>
-                    <Input defaultValue="Engineering" />
+                    <Input value={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Timezone</Label>
-                    <select className="flex h-10 w-full rounded-md border border-border-medium bg-surface-2 px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-primary/50">
-                      <option>Pacific Time (US & Canada)</option>
-                      <option>Eastern Time (US & Canada)</option>
-                      <option>UTC</option>
+                    <select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-border-medium bg-surface-2 px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-primary/50"
+                    >
+                      <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                      <option value="America/New_York">Eastern Time (US & Canada)</option>
+                      <option value="UTC">UTC</option>
                     </select>
                   </div>
                 </div>
@@ -84,9 +126,9 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <Label>Risk Confidence Threshold</Label>
-                      <span className="text-sm font-mono text-amber-text">85%</span>
+                      <span className="text-sm font-mono text-amber-text">{threshold[0]}%</span>
                     </div>
-                    <Slider defaultValue={[85]} max={100} step={1} />
+                    <Slider value={threshold} onValueChange={setThreshold} max={100} step={1} />
                     <p className="text-xs text-text-tertiary">Alerts below this confidence score will be marked as "Watch" instead of "Risk".</p>
                   </div>
 
@@ -95,10 +137,19 @@ export default function SettingsPage() {
                       <Label>Include Draft PRs</Label>
                       <p className="text-xs text-text-secondary">Analyze dependencies in draft pull requests.</p>
                     </div>
-                    <Switch />
+                    <Switch checked={includeDraftPrs} onCheckedChange={setIncludeDraftPrs} />
                   </div>
                 </div>
               </div>
+
+              <Button
+                className="w-full h-11"
+                onClick={() => saveGeneralMutation.mutate()}
+                disabled={saveGeneralMutation.isPending}
+              >
+                {saveGeneralMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {saveGeneralMutation.isPending ? 'Saving...' : 'Save Changes'}
+              </Button>
             </div>
           )}
 
@@ -116,24 +167,33 @@ export default function SettingsPage() {
                       <Label>Critical Risks</Label>
                       <p className="text-xs text-text-secondary">Immediate notification for high-impact blockers.</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={criticalRisks} onCheckedChange={setCriticalRisks} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Daily Brief</Label>
                       <p className="text-xs text-text-secondary">Morning summary of workspace health.</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={dailyBrief} onCheckedChange={setDailyBrief} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>New Dependencies</Label>
                       <p className="text-xs text-text-secondary">When a new service or library is added.</p>
                     </div>
-                    <Switch />
+                    <Switch checked={newDependencies} onCheckedChange={setNewDependencies} />
                   </div>
                 </div>
               </div>
+
+              <Button
+                className="w-full h-11"
+                onClick={() => saveNotificationsMutation.mutate()}
+                disabled={saveNotificationsMutation.isPending}
+              >
+                {saveNotificationsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {saveNotificationsMutation.isPending ? 'Saving...' : 'Save Preferences'}
+              </Button>
             </div>
           )}
 
@@ -145,7 +205,7 @@ export default function SettingsPage() {
                     <h3 className="text-lg font-medium text-text-primary mb-1">Team Members</h3>
                     <p className="text-sm text-text-secondary">Manage who has access to this workspace.</p>
                   </div>
-                  <Button variant="glass" size="sm" className="gap-2">
+                  <Button variant="glass" size="sm" className="gap-2" onClick={() => navigate('/dashboard/members')}>
                     <Plus className="w-4 h-4" /> Invite
                   </Button>
                 </div>
@@ -182,7 +242,7 @@ export default function SettingsPage() {
                               <Badge variant={member.status === 'active' ? 'ok' : 'watch'} label={member.status} />
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <Button variant="outline" size="sm">Edit</Button>
+                              <Button variant="outline" size="sm" onClick={() => toast('Member editing coming soon', { icon: '✏️' })}>Edit</Button>
                             </td>
                           </tr>
                         ))}
@@ -194,7 +254,6 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Placeholder for other tabs */}
           {(activeTab === 'privacy' || activeTab === 'billing') && (
             <div className="glass-1 p-12 rounded-2xl border border-border-medium text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="w-16 h-16 rounded-full bg-surface-2 mx-auto mb-4 flex items-center justify-center">

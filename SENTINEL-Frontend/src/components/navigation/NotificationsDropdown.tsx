@@ -1,49 +1,18 @@
 import { motion } from 'motion/react';
-import { GlassCard } from '../glass/GlassCard';
-import { Bell, Check, Info, AlertCircle, Signal } from 'lucide-react';
+import { Bell, Info, AlertCircle, Signal } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-
-interface Notification {
-    id: string;
-    title: string;
-    description: string;
-    time: string;
-    type: 'signal' | 'risk' | 'info';
-    unread: boolean;
-}
-
-const mockNotifications: Notification[] = [
-    {
-        id: '1',
-        title: 'New Signal Extracted',
-        description: 'Divya V. committed to "API Documentation" via Slack.',
-        time: '4m ago',
-        type: 'signal',
-        unread: true,
-    },
-    {
-        id: '2',
-        title: 'High Risk Detected',
-        description: 'Sprint planning doc is 2 days overdue.',
-        time: '2h ago',
-        type: 'risk',
-        unread: true,
-    },
-    {
-        id: '3',
-        title: 'System Sync Complete',
-        description: 'All 3 active integrations synced successfully.',
-        time: '5h ago',
-        type: 'info',
-        unread: false,
-    },
-];
+import { useNotifications } from '@/hooks/useData';
 
 interface NotificationsDropdownProps {
     onClose: () => void;
 }
 
 export default function NotificationsDropdown({ onClose }: NotificationsDropdownProps) {
+    const { data: notifications, isLoading } = useNotifications();
+    const list = notifications ?? [];
+    const unreadCount = list.filter(n => n.unread).length;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -54,16 +23,27 @@ export default function NotificationsDropdown({ onClose }: NotificationsDropdown
         >
             <div className="glass-frosted border border-white/10 p-0 overflow-hidden rounded-2xl shadow-2xl">
                 <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/[0.03] glass-shine">
-                    <h3 className="text-sm font-semibold text-text-primary">Notifications</h3>
+                    <h3 className="text-sm font-semibold text-text-primary">
+                        Notifications
+                        {unreadCount > 0 && (
+                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-risk/20 text-risk text-[9px] font-bold align-middle">
+                                {unreadCount}
+                            </span>
+                        )}
+                    </h3>
                     <button className="text-[10px] font-mono text-amber-text hover:text-amber-primary transition-colors">
                         MARK ALL READ
                     </button>
                 </div>
 
                 <div className="max-h-[320px] overflow-y-auto">
-                    {mockNotifications.length > 0 ? (
+                    {isLoading ? (
+                        <div className="p-8 text-center">
+                            <p className="text-xs text-text-tertiary animate-pulse font-mono">Loading...</p>
+                        </div>
+                    ) : list.length > 0 ? (
                         <div className="divide-y divide-border-soft">
-                            {mockNotifications.map((n) => (
+                            {list.map((n) => (
                                 <div
                                     key={n.id}
                                     className={cn(
@@ -108,9 +88,13 @@ export default function NotificationsDropdown({ onClose }: NotificationsDropdown
                 </div>
 
                 <div className="p-2 bg-white/[0.02] border-t border-white/10">
-                    <button className="w-full py-2 rounded-lg text-xs text-text-secondary hover:text-text-primary hover:bg-white/5 transition-all">
+                    <Link
+                        to="/dashboard/alerts"
+                        onClick={onClose}
+                        className="block w-full py-2 rounded-lg text-xs text-center text-text-secondary hover:text-text-primary hover:bg-white/5 transition-all"
+                    >
                         View All Activity
-                    </button>
+                    </Link>
                 </div>
             </div>
         </motion.div>

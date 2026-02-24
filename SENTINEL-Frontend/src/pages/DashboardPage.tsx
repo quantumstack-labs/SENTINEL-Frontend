@@ -9,7 +9,8 @@ import { useDashboard } from '@/context/DashboardContext';
 import {
   useCommitments,
   useExecutionScore,
-  useGraphData
+  useGraphData,
+  useTeamMembers // <-- Added this to get your real name!
 } from '@/hooks/useData';
 import { AmbientGlow } from '@/components/glass/AmbientGlow';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,8 +21,9 @@ function DashboardContent() {
   const { data: commitments, isLoading: commitmentsLoading } = useCommitments();
   const { data: score, isLoading: scoreLoading } = useExecutionScore();
   const { data: graphData, isLoading: graphLoading } = useGraphData();
+  const { data: members, isLoading: membersLoading } = useTeamMembers(); // <-- Fetching real users
 
-  if (commitmentsLoading || scoreLoading || graphLoading) {
+  if (commitmentsLoading || scoreLoading || graphLoading || membersLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-text-secondary animate-pulse font-mono">Loading data...</div>
@@ -30,11 +32,18 @@ function DashboardContent() {
   }
 
   // Derived state for the brief
-  const atRiskCount = commitments.filter(c => c.risk === 'at-risk').length;
-  const watchCount = commitments.filter(c => c.risk === 'watch').length;
-  const onTrackCount = commitments.filter(c => c.risk === 'on-track').length;
+  const atRiskCount = (commitments ?? []).filter((c: any) => c.risk === 'at-risk').length;
+  const watchCount = (commitments ?? []).filter((c: any) => c.risk === 'watch').length;
+  const onTrackCount = (commitments ?? []).filter((c: any) => c.risk === 'on-track').length;
+  const criticalCommitment = (commitments ?? []).find((c: any) => c.isCritical);
 
-  const criticalCommitment = commitments.find(c => c.isCritical);
+  // Get real dynamic date
+  const today = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  }).format(new Date());
+
+  // Extract the first name of the logged-in admin (Fallback to "there" if missing)
+  const currentUser = members && members.length > 0 ? members[0].name.split(' ')[0] : 'there';
 
   return (
     <div className={cn(
@@ -49,10 +58,10 @@ function DashboardContent() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="text-[13px] font-mono text-text-tertiary mb-1">
-              Friday, February 21, 2026
+              {today} {/* <-- Replaced hardcoded date */}
             </div>
             <h1 className="font-display text-3xl font-bold text-text-primary">
-              Good morning, Arjun. <span className="text-2xl">👋</span>
+              Good morning, {currentUser}. <span className="text-2xl">👋</span> {/* <-- Replaced Arjun */}
             </h1>
           </div>
 
@@ -75,12 +84,14 @@ function DashboardContent() {
               className="space-y-6"
             >
               {/* Score Bar */}
-              <ScoreBar
-                score={score.current}
-                trend={score.trend}
-                delta={score.delta}
-                status={score.status}
-              />
+              {score && (
+                <ScoreBar
+                  score={score.current}
+                  trend={score.trend}
+                  delta={score.delta}
+                  status={score.status}
+                />
+              )}
 
               {/* Status Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -110,11 +121,11 @@ function DashboardContent() {
               )}
 
               {/* Commitment Table */}
-              <CommitmentTable commitments={commitments} />
+              <CommitmentTable commitments={commitments ?? []} />
             </motion.div>
           )}
 
-          {view === 'graph' && (
+          {view === 'graph' && graphData && (
             <motion.div
               key="graph"
               initial={{ opacity: 0 }}
@@ -135,7 +146,7 @@ function DashboardContent() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <CommitmentTable commitments={commitments} />
+              <CommitmentTable commitments={commitments ?? []} />
             </motion.div>
           )}
         </AnimatePresence>

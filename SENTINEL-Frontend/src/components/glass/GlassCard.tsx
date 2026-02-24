@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 type GlassCardVariant = 'default' | 'elevated' | 'amber';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  key?: React.Key;
   variant?: GlassCardVariant;
   hover?: boolean;
   children?: React.ReactNode;

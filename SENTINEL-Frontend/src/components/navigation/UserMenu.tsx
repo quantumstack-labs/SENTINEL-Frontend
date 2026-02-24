@@ -1,18 +1,41 @@
 import { motion } from 'motion/react';
-import { GlassCard } from '../glass/GlassCard';
-import { Settings, LogOut, User, Shield, Zap, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { LogOut, User, Shield, Zap, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useTeamMembers } from '@/hooks/useData';
+import toast from 'react-hot-toast';
 
 interface UserMenuProps {
     onClose: () => void;
 }
 
 export default function UserMenu({ onClose }: UserMenuProps) {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+    const { data: members } = useTeamMembers();
+    const currentUser = members?.[0];
+    const initials = currentUser?.initials ?? currentUser?.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? 'U';
+
     const menuItems = [
         { icon: User, label: 'Profile Settings', description: 'Manage your account and preferences' },
         { icon: Shield, label: 'Security', description: 'Two-factor auth and API keys' },
         { icon: Zap, label: 'Billing & Plan', description: 'Pro Plan — Next sync March 1', badge: 'PRO' },
     ];
+
+    const handleMenuItemClick = () => {
+        navigate('/settings');
+        onClose();
+    };
+
+    const handleSignOut = () => {
+        logout();
+        onClose();
+    };
+
+    const handleHelpCenter = () => {
+        toast('Help Center coming soon', { icon: 'C' });
+        onClose();
+    };
 
     return (
         <motion.div
@@ -27,11 +50,11 @@ export default function UserMenu({ onClose }: UserMenuProps) {
                 <div className="p-4 bg-white/[0.03] border-b border-white/10 glass-shine">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-primary to-orange-600 flex items-center justify-center text-bg font-bold text-base shadow-lg shadow-amber-primary/20">
-                            AK
+                            {initials}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-text-primary truncate">Arjun K.</p>
-                            <p className="text-xs text-text-secondary truncate">arjun@acme.corp</p>
+                            <p className="text-sm font-semibold text-text-primary truncate">{currentUser?.name ?? 'User'}</p>
+                            <p className="text-xs text-text-secondary truncate">{currentUser?.email}</p>
                         </div>
                     </div>
                 </div>
@@ -42,6 +65,7 @@ export default function UserMenu({ onClose }: UserMenuProps) {
                         {menuItems.map((item) => (
                             <button
                                 key={item.label}
+                                onClick={handleMenuItemClick}
                                 className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-all group text-left"
                             >
                                 <div className="w-8 h-8 rounded-lg bg-surface-3 flex items-center justify-center text-text-tertiary group-hover:text-amber-primary transition-colors">
@@ -66,7 +90,10 @@ export default function UserMenu({ onClose }: UserMenuProps) {
 
                     <div className="my-2 h-[1px] bg-border-soft" />
 
-                    <button className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-risk/10 transition-all group text-left">
+                    <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-risk/10 transition-all group text-left"
+                    >
                         <div className="w-8 h-8 rounded-lg bg-surface-3 flex items-center justify-center text-text-tertiary group-hover:text-risk transition-colors">
                             <LogOut className="w-4 h-4" />
                         </div>
@@ -79,7 +106,10 @@ export default function UserMenu({ onClose }: UserMenuProps) {
                 {/* Footer */}
                 <div className="px-4 py-3 bg-white/[0.02] border-t border-white/10 flex items-center justify-between">
                     <span className="text-[10px] font-mono text-text-tertiary">v1.2.4-stable</span>
-                    <button className="text-[10px] font-medium text-amber-text flex items-center gap-1 hover:text-amber-primary transition-colors">
+                    <button
+                        onClick={handleHelpCenter}
+                        className="text-[10px] font-medium text-amber-text flex items-center gap-1 hover:text-amber-primary transition-colors"
+                    >
                         HELP CENTER <ChevronRight className="w-3 h-3" />
                     </button>
                 </div>

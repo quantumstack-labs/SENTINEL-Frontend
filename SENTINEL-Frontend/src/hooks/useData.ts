@@ -1,59 +1,55 @@
-import { 
-  mockCommitments, 
-  mockExecutionScore, 
-  mockTeamMembers, 
-  mockGraphNodes, 
-  mockGraphEdges, 
-  mockIntegrations 
-} from '@/lib/mock-data';
-import { 
-  Commitment, 
-  ExecutionScore, 
-  TeamMember, 
-  GraphNode, 
-  GraphEdge, 
-  Integration 
-} from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import type { Commitment, ExecutionScore, TeamMember, GraphNode, GraphEdge, Integration, Notification, WorkspaceSettings } from '@/types';
 
-/**
- * Hook to fetch all commitments.
- * In a real app, this would use useQuery from @tanstack/react-query.
- */
-export function useCommitments(): { data: Commitment[]; isLoading: boolean } {
-  // Simulating a fast fetch
-  return { data: mockCommitments, isLoading: false };
+export function useCommitments() {
+  return useQuery<Commitment[]>({
+    queryKey: ['commitments'],
+    queryFn: () => api.get<Commitment[]>('/commitments'),
+  });
 }
 
-/**
- * Hook to fetch execution health score.
- */
-export function useExecutionScore(): { data: ExecutionScore; isLoading: boolean } {
-  return { data: mockExecutionScore, isLoading: false };
+export function useExecutionScore() {
+  return useQuery<ExecutionScore>({
+    queryKey: ['executionScore'],
+    queryFn: () => api.get<ExecutionScore>('/dashboard/score'),
+    refetchInterval: 60_000,
+  });
 }
 
-/**
- * Hook to fetch team members.
- */
-export function useTeamMembers(): { data: TeamMember[]; isLoading: boolean } {
-  return { data: mockTeamMembers, isLoading: false };
+export function useTeamMembers() {
+  return useQuery<TeamMember[]>({
+    queryKey: ['teamMembers'],
+    queryFn: () => api.get<TeamMember[]>('/team/members'),
+  });
 }
 
-/**
- * Hook to fetch dependency graph data.
- */
-export function useGraphData(): { data: { nodes: GraphNode[]; edges: GraphEdge[] }; isLoading: boolean } {
-  return { 
-    data: { 
-      nodes: mockGraphNodes, 
-      edges: mockGraphEdges 
-    }, 
-    isLoading: false 
-  };
+export function useGraphData() {
+  return useQuery<{ nodes: GraphNode[]; edges: GraphEdge[] }>({
+    queryKey: ['graphData'],
+    queryFn: () => api.get<{ nodes: GraphNode[]; edges: GraphEdge[] }>('/dashboard/graph'),
+    refetchInterval: 60_000,
+  });
 }
 
-/**
- * Hook to fetch integrations.
- */
-export function useIntegrations(): { data: Integration[]; isLoading: boolean } {
-  return { data: mockIntegrations, isLoading: false };
+export function useIntegrations() {
+  return useQuery<Integration[]>({
+    queryKey: ['integrations'],
+    queryFn: () => api.get<Integration[]>('/integrations'),
+  });
+}
+
+export function useNotifications() {
+  return useQuery<Notification[]>({
+    queryKey: ['notifications'],
+    queryFn: () => api.get<Notification[]>('/notifications'),
+    refetchInterval: 30_000,
+  });
+}
+
+export function useWorkspaceSettings() {
+  return useQuery<WorkspaceSettings>({
+    queryKey: ['workspaceSettings'],
+    queryFn: () => api.get<WorkspaceSettings>('/workspace/settings'),
+  });
 }

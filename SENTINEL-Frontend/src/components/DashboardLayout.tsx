@@ -24,9 +24,11 @@ import { useDashboard } from '@/context/DashboardContext';
 import { GlassCard } from './glass/GlassCard';
 import { Button } from './ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
+import toast from 'react-hot-toast';
 import NotificationsDropdown from './navigation/NotificationsDropdown';
 import UserMenu from './navigation/UserMenu';
 import CommandPalette from './navigation/CommandPalette';
+import { useTeamMembers, useWorkspaceSettings } from '@/hooks/useData';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -36,6 +38,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { view, setView } = useDashboard();
+  const { data: settings } = useWorkspaceSettings();
+  const workspaceName = settings?.workspaceName ?? 'Workspace';
+  const workspaceInitial = workspaceName[0]?.toUpperCase() ?? 'W';
 
   const isDashboard = location.pathname === '/dashboard';
 
@@ -104,11 +109,11 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         <div className="group cursor-pointer">
           <div className="glass-frosted p-3 rounded-xl flex items-center gap-3 border border-white/10 hover:border-amber-primary/30 transition-all shadow-xl">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-primary to-orange-600 flex items-center justify-center text-bg font-bold text-xs shadow-lg shadow-amber-primary/10">
-              E
+              {workspaceInitial}
             </div>
             <div className="flex-1 min-w-0 text-left">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-text-primary truncate">Engineering</p>
+                <p className="text-xs font-semibold text-text-primary truncate">{workspaceName}</p>
                 <RefreshCw className="w-2.5 h-2.5 text-amber-primary animate-spin-slow" />
               </div>
               <p className="text-[10px] text-text-secondary font-medium truncate">Active Syncing...</p>
@@ -131,7 +136,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             </div>
           </div>
 
-          <button className="w-full py-1.5 rounded-md border border-border-soft text-[10px] font-medium text-text-tertiary hover:text-amber-text hover:bg-white/5 hover:border-amber-primary/20 transition-all flex items-center justify-center gap-1.5">
+          <button
+            onClick={() => { navigate('/settings'); if (onClose) onClose(); }}
+            className="w-full py-1.5 rounded-md border border-border-soft text-[10px] font-medium text-text-tertiary hover:text-amber-text hover:bg-white/5 hover:border-amber-primary/20 transition-all flex items-center justify-center gap-1.5"
+          >
             MANAGE WORKSPACE <ExternalLink className="w-2.5 h-2.5" />
           </button>
         </div>
@@ -145,6 +153,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [activeDropdown, setActiveDropdown] = useState<'notifications' | 'profile' | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const { view } = useDashboard();
+  const { data: members } = useTeamMembers();
+  const { data: settings } = useWorkspaceSettings();
+  const topbarWorkspaceName = settings?.workspaceName ?? 'Workspace';
+  const topbarInitials = members?.[0]?.initials ?? members?.[0]?.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? 'U';
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -221,13 +233,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <span className="text-[9px] font-mono font-bold text-safe uppercase tracking-widest leading-none">Signals Live</span>
                 <span className="text-[8px] text-safe/70 font-medium">SYNCED 2M AGO</span>
               </div>
-              <button className="ml-2 p-1 rounded hover:bg-safe/20 text-safe transition-colors" title="Sync Now">
+              <button
+                onClick={() => toast.success('Sync triggered — next update in ~30s')}
+                className="ml-2 p-1 rounded hover:bg-safe/20 text-safe transition-colors" title="Sync Now"
+              >
                 <RefreshCw className="w-2.5 h-2.5 group-hover/sync:rotate-180 transition-transform duration-500" />
               </button>
             </div>
 
             <div className="hidden lg:flex items-center gap-2 text-[11px] font-medium tracking-tight text-text-secondary ml-3 border-l border-white/10 pl-4">
-              <span className="text-text-primary">Engineering</span>
+              <span className="text-text-primary">{topbarWorkspaceName}</span>
               <span className="text-text-secondary opacity-30">/</span>
               <span className="text-text-primary">Dashboard</span>
               <span className="text-text-secondary opacity-30">/</span>
@@ -278,7 +293,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-primary to-orange-600 flex items-center justify-center text-bg font-bold text-[10px]">
-                  AK
+                  {topbarInitials}
                 </div>
                 <ChevronDown className={cn(
                   "w-3 h-3 text-text-tertiary hidden sm:block transition-transform duration-200",

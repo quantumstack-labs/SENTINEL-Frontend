@@ -1,5 +1,5 @@
 export type RiskLevel = 'at-risk' | 'watch' | 'on-track';
-export type CommitmentSource = 'slack' | 'email' | 'meeting';
+export type CommitmentSource = 'slack' | 'email' | 'meeting' | 'github';
 
 export type Commitment = {
   id: string;
@@ -76,4 +76,22 @@ export type Integration = {
   channels?: string[];
   lastSynced?: string;
   description: string;
+};
+
+export type NotificationType = 'signal' | 'risk' | 'info';
+
+export type Notification = {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+  type: NotificationType;
+  unread: boolean;
+};
+
+export type WorkspaceSettings = {
+  workspaceName: string;
+  workspaceSlug?: string;
+  plan?: string;
+  timezone?: string;
 };

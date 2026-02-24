@@ -69,7 +69,12 @@ export default function LandingPage() {
                     Launch Dashboard <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
-                <Button variant="ghost" size="lg" className="h-14 px-10 text-base border-white/5 bg-white/5 hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="h-14 px-10 text-base border-white/5 bg-white/5 hover:bg-white/10"
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                >
                   Watch Demo
                 </Button>
               </div>
@@ -163,7 +168,7 @@ export default function LandingPage() {
         </div>
 
         {/* Feature Cards / Use Cases */}
-        <div className="max-w-7xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 pb-32">
+        <div id="features" className="max-w-7xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 pb-32">
           {[
             {
               title: "Dependency Mapping",
