@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
 
@@ -48,6 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(false);
         navigate('/login');
     }, [navigate]);
+
+    // Listen for 401 session-expired events dispatched by api.ts.
+    // Using logout() here means React Router handles navigation — no page
+    // reload, so React Query doesn't remount and re-fire all queries.
+    useEffect(() => {
+        const handleExpired = () => logout();
+        window.addEventListener('sentinel-session-expired', handleExpired);
+        return () => window.removeEventListener('sentinel-session-expired', handleExpired);
+    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, login, logout, checkAuth }}>
