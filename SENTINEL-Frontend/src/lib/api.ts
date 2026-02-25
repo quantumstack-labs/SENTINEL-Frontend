@@ -16,12 +16,26 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
         ...init,
         headers: { ...authHeaders(), ...(init.headers ?? {}) },
     });
+
+    // VULN-10 FIX: Intercept 401 — session expired or token invalid
+    if (res.status === 401) {
+        localStorage.removeItem('sentinel_token');
+        localStorage.removeItem('sentinel_refresh_token');
+        // Dynamically import toast to avoid circular deps at module load time
+        import('react-hot-toast').then(({ default: toast }) => {
+            toast.error('Session expired — please sign in again.');
+        });
+        window.location.href = '/login';
+        throw new Error('Session expired');
+    }
+
     const json = await res.json();
     if (!res.ok || !json.success) {
         throw new Error(json.error ?? `Request failed: ${res.status}`);
     }
     return json.data as T;
 }
+
 
 export const api = {
     get: <T>(path: string) => request<T>(path),

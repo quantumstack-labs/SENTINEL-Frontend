@@ -16,9 +16,10 @@ import {
   RefreshCw,
   ExternalLink,
   Command,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
-import { useIsFetching } from '@tanstack/react-query';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import HealthOrb from './HealthOrb';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
@@ -166,6 +167,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'notifications' | 'profile' | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);  // VULN-11: pipeline running state
+  const queryClient = useQueryClient();  // VULN-11: to invalidate caches after run
 
   const isFetching = useIsFetching();
   const syncStatus = isFetching > 0 ? 'syncing' : 'synced';
@@ -263,13 +266,28 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </span>
               </div>
               <button
-                onClick={() => toast.success('Sync triggered — next update in ~30s')}
-                className="ml-2 p-1 rounded hover:bg-safe/20 text-safe transition-colors" title="Sync Now"
+                onClick={async () => {
+                  if (isRunning) return;
+                  setIsRunning(true);
+                  try {
+                    const { api } = await import('@/lib/api');
+                    const result = await api.post<{ commitments_saved: number }>('/pipeline/run');
+                    toast.success(`Analysis complete — ${result.commitments_saved ?? 0} commitment(s) found`);
+                    // Invalidate all cached data so dashboard refreshes
+                    queryClient.invalidateQueries();
+                  } catch (err: any) {
+                    toast.error(`Analysis failed: ${err.message ?? 'unknown error'}`);
+                  } finally {
+                    setIsRunning(false);
+                  }
+                }}
+                disabled={isRunning}
+                className="ml-2 p-1 rounded hover:bg-safe/20 text-safe transition-colors disabled:opacity-50" title={isRunning ? 'Running...' : 'Run Analysis Now'}
               >
-                <RefreshCw className={cn(
-                  "w-2.5 h-2.5 transition-transform duration-500",
-                  syncStatus === 'syncing' ? "rotate-180" : "group-hover/sync:rotate-180"
-                )} />
+                {isRunning
+                  ? <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                  : <RefreshCw className={cn("w-2.5 h-2.5 transition-transform duration-500", syncStatus === 'syncing' ? "rotate-180" : "group-hover/sync:rotate-180")} />
+                }
               </button>
             </div>
 

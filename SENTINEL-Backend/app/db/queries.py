@@ -1,4 +1,8 @@
 from app.db.client import get_supabase
+from app.db.crypto import encrypt_token, decrypt_token
+
+# Sensitive fields that must be encrypted before DB write and decrypted after read
+_TOKEN_FIELDS = ("slack_bot_token", "github_access_token", "gmail_access_token", "gmail_refresh_token")
 
 
 def fetch_commitments(workspace_id: str, resolved: bool = False) -> list[dict]:
@@ -55,7 +59,13 @@ def fetch_integrations(workspace_id: str) -> list[dict]:
         .eq("workspace_id", workspace_id)
         .execute()
     )
-    return result.data or []
+    rows = result.data or []
+    # VULN-12 FIX: Decrypt sensitive token fields on read
+    for row in rows:
+        for field in _TOKEN_FIELDS:
+            if row.get(field):
+                row[field] = decrypt_token(row[field])
+    return rows
 
 
 def fetch_notifications(workspace_id: str, user_id: str | None = None) -> list[dict]:
@@ -167,6 +177,10 @@ def update_integration_status(
     payload = {"status": status}
     if extra:
         payload.update(extra)
+    # VULN-12 FIX: Encrypt sensitive token fields before write
+    for field in _TOKEN_FIELDS:
+        if field in payload and payload[field] is not None:
+            payload[field] = encrypt_token(payload[field])
     result = (
         sb.table("integrations")
         .update(payload)

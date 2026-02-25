@@ -59,17 +59,34 @@ def _select_model(client: Groq) -> str:
         return PRIORITY_MODELS[0]
 
 
+# Common prompt injection phrases to sanitize from user-supplied content
+_INJECTION_PATTERNS = [
+    "ignore previous", "ignore all", "disregard", "new instructions",
+    "system prompt", "you are now", "delete all", "drop table",
+    "forget everything", "act as",
+]
+
+
+def _sanitize_text(text: str) -> str:
+    """Redact messages that appear to contain prompt injection attempts."""
+    lower = text.lower()
+    for pattern in _INJECTION_PATTERNS:
+        if pattern in lower:
+            return "[MESSAGE REDACTED: policy violation detected]"
+    return text
+
+
 def _format_messages(messages: list) -> str:
     lines = []
     for m in messages:
         if isinstance(m, dict):
             email = m.get("author_email", "unknown@unknown.com")
             channel = m.get("channel", "unknown")
-            text = m.get("text", "")
+            text = _sanitize_text(m.get("text", ""))
             prefix = f"[author: {email}] [channel: {channel}] "
             lines.append(f"{prefix}{text}")
         else:
-            lines.append(str(m))
+            lines.append(_sanitize_text(str(m)))
     return "\n---\n".join(lines)
 
 
@@ -125,7 +142,8 @@ async def extract_commitments(messages: list) -> list[dict]:
             return []
         print(f"  [LLM] [OK] Extracted {len(results)} commitment(s).")
         for i, c in enumerate(results):
-            print(f"    [{i+1}] \"{c.get('description', '')}\" | owner={c.get('owner_email') or c.get('owner_name')} | channel={c.get('source_channel')} | confidence={c.get('confidence')} | due={c.get('due_date')}")
+            # Redact email from logs to prevent PII exposure during screen-shares
+            print(f"    [{i+1}] \"{c.get('description', '')}\" | owner=[redacted] | channel={c.get('source_channel')} | confidence={c.get('confidence')} | due={c.get('due_date')}")
         return results
     except json.JSONDecodeError as exc:
         print(f"  [LLM] [FAIL] Failed to parse JSON: {exc}")
