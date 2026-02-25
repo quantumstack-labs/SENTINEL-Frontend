@@ -271,7 +271,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   setIsRunning(true);
                   try {
                     const { api } = await import('@/lib/api');
-                    const result = await api.post<{ commitments_saved: number }>('/pipeline/run');
+                     const result = await api.post<{ commitments_saved: number }>('/internal/cron/run-pipeline');
                     toast.success(`Analysis complete — ${result.commitments_saved ?? 0} commitment(s) found`);
                     // Invalidate all cached data so dashboard refreshes
                     queryClient.invalidateQueries();

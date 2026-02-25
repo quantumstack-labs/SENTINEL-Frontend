@@ -1,6 +1,4 @@
-// Base URL — MUST include the /api/v1 suffix in your .env files.
-// Local:      VITE_API_URL=http://localhost:8000/api/v1
-// Production: VITE_API_URL=https://sentinel-f1v7.onrender.com/api/v1
+
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 
 function getToken(): string {
@@ -14,14 +12,11 @@ function authHeaders(): HeadersInit {
     };
 }
 
-// ── 401 Guard ───────────────────────────────────────────────────────────────
-// Module-level flag: only trigger the session-expired flow once, even when
-// multiple React Query hooks receive a 401 in the same render cycle.
+
 let _isHandling401 = false;
 
 function handle401(): void {
-    // Never redirect if we're already on a public auth page — this is what
-    // broke the infinite loop: the page was reloaded → queries refired → 401.
+
     const publicPaths = ['/login', '/signup', '/'];
     if (publicPaths.some(p => window.location.pathname === p)) return;
     if (_isHandling401) return;
@@ -30,8 +25,6 @@ function handle401(): void {
     localStorage.removeItem('sentinel_token');
     localStorage.removeItem('sentinel_refresh_token');
 
-    // Dispatch a custom event so AuthContext can call navigate('/login') via
-    // the React Router — no full page reload, no remount, no re-fired queries.
     window.dispatchEvent(new CustomEvent('sentinel-session-expired'));
 }
 // ────────────────────────────────────────────────────────────────────────────
