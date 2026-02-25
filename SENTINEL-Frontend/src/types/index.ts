@@ -76,6 +76,9 @@ export type Integration = {
   channels?: string[];
   lastSynced?: string;
   description: string;
+  github_access_token?: string;
+  slack_bot_token?: string;
+  gmail_access_token?: string;
 };
 
 export type NotificationType = 'signal' | 'risk' | 'info';

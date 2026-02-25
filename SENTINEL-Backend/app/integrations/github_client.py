@@ -23,7 +23,7 @@ class GitHubClient:
                 )
                 
                 if pulls_res.status_code != 200:
-                    print(f"  [GitHub] ✗ Failed to fetch PRs for {repo_full_name}: HTTP {pulls_res.status_code}")
+                    print(f"  [GitHub] [FAIL] Failed to fetch PRs for {repo_full_name}: HTTP {pulls_res.status_code}")
                     return
 
                 pulls = pulls_res.json()
@@ -54,4 +54,4 @@ class GitHubClient:
                         sig["external_ref"] = pr["html_url"]
                         commitment_service.create_commitment(workspace_id, sig)
         except Exception as exc:
-            print(f"  [GitHub] ✗ sync_repository_signals failed for {repo_full_name}: {type(exc).__name__}: {exc}")
+            print(f"  [GitHub] [FAIL] sync_repository_signals failed for {repo_full_name}: {type(exc).__name__}: {exc}")

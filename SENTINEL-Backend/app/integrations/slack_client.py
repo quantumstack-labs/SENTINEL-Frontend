@@ -96,7 +96,7 @@ async def fetch_recent_messages(
                 if data.get("ok"):
                     raw = data.get("messages", [])
                     human = [m for m in raw if m.get("text", "").strip() and not m.get("bot_id") and m.get("user")]
-                    print(f"  [Slack] ✓ Channel '{channel_name}' ({channel_id}): {len(raw)} total, {len(human)} human messages.")
+                    print(f"  [Slack] [OK] Channel '{channel_name}' ({channel_id}): {len(raw)} total, {len(human)} human messages.")
                     for msg in human:
                         slack_user_id = msg.get("user", "")
                         author_email = await _resolve_email(client, bot_token, slack_user_id) if slack_user_id else ""
@@ -107,7 +107,7 @@ async def fetch_recent_messages(
                         })
                 else:
                     error = data.get("error", "unknown_error")
-                    print(f"  [Slack] ✗ Channel '{channel_id}' error: {error}")
+                    print(f"  [Slack] [FAIL] Channel '{channel_id}' error: {error}")
                     if error == "not_in_channel":
                         print("  [Slack]   → Invite the bot: /invite @YourBotName")
                     elif error == "channel_not_found":
@@ -115,9 +115,9 @@ async def fetch_recent_messages(
                     elif error == "invalid_auth":
                         print("  [Slack]   → Bot token is invalid or revoked.")
             except httpx.TimeoutException:
-                print(f"  [Slack] ✗ Channel '{channel_id}' timed out after 15s.")
+                print(f"  [Slack] [FAIL] Channel '{channel_id}' timed out after 15s.")
             except Exception as exc:
-                print(f"  [Slack] ✗ Channel '{channel_id}' unexpected error: {type(exc).__name__}: {exc}")
+                print(f"  [Slack] [FAIL] Channel '{channel_id}' unexpected error: {type(exc).__name__}: {exc}")
 
     print(f"  [Slack] Done. Total messages collected: {len(messages)}")
     return messages

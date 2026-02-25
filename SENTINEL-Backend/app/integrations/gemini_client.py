@@ -48,16 +48,16 @@ Messages:
     raw_text = await asyncio.get_event_loop().run_in_executor(None, _call_gemini)
 
     if not raw_text:
-        print("  [Gemini] ✗ Empty response from Gemini.")
+        print("  [Gemini] [FAIL] Empty response from Gemini.")
         return []
 
     try:
         results = json.loads(raw_text)
-        print(f"  [Gemini] ✓ Extracted {len(results)} commitment(s).")
+        print(f"  [Gemini] [OK] Extracted {len(results)} commitment(s).")
         for i, c in enumerate(results):
             print(f"    [{i+1}] \"{c.get('description', '')}\" | owner={c.get('owner_name')} | confidence={c.get('confidence')} | due={c.get('due_date')}")
         return results
     except json.JSONDecodeError as exc:
-        print(f"  [Gemini] ✗ Failed to parse JSON response: {exc}")
+        print(f"  [Gemini] [FAIL] Failed to parse JSON response: {exc}")
         print(f"  [Gemini]   Raw response was: {raw_text[:500]}")
         return []

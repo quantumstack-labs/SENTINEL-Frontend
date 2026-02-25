@@ -52,4 +52,3 @@ async def health():
 
 
 app.include_router(router)
-app.include_router(github.router, prefix="/api/integrations")

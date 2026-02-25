@@ -180,7 +180,7 @@ export default function GraphCanvas({ nodes: initialNodes, edges }: GraphCanvasP
             onClick={handleUndo}
             disabled={history.length === 0}
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg glass-frosted glass-shine text-[10px] font-mono transition-all border border-white/10 shadow-lg",
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg glass-frosted text-[10px] font-mono transition-all border border-white/10 shadow-lg",
               history.length > 0
                 ? "text-text-primary hover:text-amber-primary hover:bg-white/10"
                 : "text-text-tertiary opacity-30 cursor-not-allowed"
@@ -194,7 +194,7 @@ export default function GraphCanvas({ nodes: initialNodes, edges }: GraphCanvasP
           {/* Reset Button */}
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass-frosted glass-shine text-[10px] font-mono text-text-secondary hover:text-at-risk hover:bg-at-risk/10 transition-all border border-white/10 shadow-lg group"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass-frosted text-[10px] font-mono text-text-secondary hover:text-at-risk hover:bg-at-risk/10 transition-all border border-white/10 shadow-lg group"
           >
             <RefreshCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
             <span className="font-bold">RESET</span>
@@ -215,7 +215,7 @@ export default function GraphCanvas({ nodes: initialNodes, edges }: GraphCanvasP
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-sm glass-frosted glass-shine p-6 rounded-2xl border border-white/10 shadow-2xl text-center"
+              className="w-full max-w-sm glass-frosted p-6 rounded-2xl border border-white/10 shadow-2xl text-center"
             >
               <div className="w-12 h-12 rounded-full bg-risk/10 flex items-center justify-center mx-auto mb-4 border border-risk/20">
                 <RefreshCw className="w-6 h-6 text-risk" />
@@ -316,7 +316,7 @@ export default function GraphCanvas({ nodes: initialNodes, edges }: GraphCanvasP
       )}
 
       <GraphLegend />
-      <div className="absolute bottom-6 right-6 glass-frosted glass-shine p-1 rounded-xl border border-white/10 shadow-2xl overflow-hidden">
+      <div className="absolute bottom-6 right-6 glass-frosted p-1 rounded-xl border border-white/10 shadow-2xl overflow-hidden">
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
       </div>
     </div>

@@ -95,6 +95,9 @@ class IntegrationOut(CamelModel):
     channels: Optional[list[str]] = None
     last_synced: Optional[str] = None
     description: str
+    github_access_token: Optional[str] = None
+    slack_bot_token: Optional[str] = None
+    gmail_access_token: Optional[str] = None
 
 
 class TeamMemberOut(CamelModel):

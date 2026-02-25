@@ -18,6 +18,7 @@ import {
   Command,
   CheckCircle2
 } from 'lucide-react';
+import { useIsFetching } from '@tanstack/react-query';
 import HealthOrb from './HealthOrb';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
@@ -28,7 +29,10 @@ import toast from 'react-hot-toast';
 import NotificationsDropdown from './navigation/NotificationsDropdown';
 import UserMenu from './navigation/UserMenu';
 import CommandPalette from './navigation/CommandPalette';
-import { useTeamMembers, useWorkspaceSettings } from '@/hooks/useData';
+import { useTeamMembers, useWorkspaceSettings, useIntegrations } from '@/hooks/useData';
+
+import DemoNav from './navigation/DemoNav';
+import { Logo } from './brand/Logo';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -39,6 +43,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const navigate = useNavigate();
   const { view, setView } = useDashboard();
   const { data: settings } = useWorkspaceSettings();
+  const { data: integrations } = useIntegrations();
+  const isFetching = useIsFetching();
+  const syncStatus = isFetching > 0 ? 'syncing' : 'synced';
+
+  const connectedCount = (integrations ?? []).filter(i => i.status === 'connected').length;
+  const totalTools = 8;
+  const capacityPercentage = (connectedCount / totalTools) * 100;
+
   const workspaceName = settings?.workspaceName ?? 'Workspace';
   const workspaceInitial = workspaceName[0]?.toUpperCase() ?? 'W';
 
@@ -65,11 +77,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-surface-1/40">
       {/* Sidebar Header */}
-      <div className="h-14 flex items-center px-4 border-b border-border-soft gap-3 flex-shrink-0">
-        <HealthOrb status="safe" size={12} />
-        <span className="font-display font-medium text-lg tracking-tight">Sentinel</span>
+      <div className="h-14 flex items-center px-4 border-b border-border-soft flex-shrink-0">
+        <Logo size="sm" />
       </div>
 
       {/* Navigation */}
@@ -108,15 +119,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       <div className="p-4 border-t border-border-soft flex-shrink-0 space-y-4">
         <div className="group cursor-pointer">
           <div className="glass-frosted p-3 rounded-xl flex items-center gap-3 border border-white/10 hover:border-amber-primary/30 transition-all shadow-xl">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-primary to-orange-600 flex items-center justify-center text-bg font-bold text-xs shadow-lg shadow-amber-primary/10">
-              {workspaceInitial}
-            </div>
+            <Logo variant="icon" size="sm" />
             <div className="flex-1 min-w-0 text-left">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-text-primary truncate">{workspaceName}</p>
-                <RefreshCw className="w-2.5 h-2.5 text-amber-primary animate-spin-slow" />
+                <RefreshCw className={cn(
+                  "w-2.5 h-2.5 text-amber-primary transition-all duration-700",
+                  syncStatus === 'syncing' ? "animate-spin-slow opacity-100" : "rotate-180 opacity-40"
+                )} />
               </div>
-              <p className="text-[10px] text-text-secondary font-medium truncate">Active Syncing...</p>
+              <p className="text-[10px] text-text-secondary font-medium truncate">
+                {syncStatus === 'syncing' ? 'Active Syncing...' : 'Synced Just Now'}
+              </p>
             </div>
           </div>
         </div>
@@ -125,12 +139,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between items-center text-[10px]">
               <span className="text-text-secondary flex items-center gap-1 font-bold"> <Zap className="w-2.5 h-2.5 text-amber-primary" /> CAPACITY</span>
-              <span className="text-text-primary font-mono font-bold">3 / 8 Tools</span>
+              <span className="text-text-primary font-mono font-bold">{connectedCount} / {totalTools} Tools</span>
             </div>
             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: '37.5%' }}
+                animate={{ width: `${capacityPercentage}%` }}
                 className="h-full bg-gradient-to-r from-amber-primary to-orange-500 shadow-[0_0_8px_rgba(245,166,35,0.4)]"
               />
             </div>
@@ -152,6 +166,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'notifications' | 'profile' | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  const isFetching = useIsFetching();
+  const syncStatus = isFetching > 0 ? 'syncing' : 'synced';
+
   const { view } = useDashboard();
   const { data: members } = useTeamMembers();
   const { data: settings } = useWorkspaceSettings();
@@ -182,9 +200,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-bg flex">
+    <div className="min-h-screen bg-bg flex relative overflow-x-hidden">
+      {/* Background System */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-100px] left-[-100px] w-[600px] h-[600px] bg-amber-primary/10 blur-[150px] rounded-full opacity-30" />
+        <div className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] bg-amber-primary/5 blur-[120px] rounded-full opacity-20" />
+      </div>
+
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-[240px] fixed left-0 top-0 bottom-0 border-r border-border-soft bg-surface-1 z-30 flex-col">
+      <aside className="hidden lg:flex w-[240px] fixed left-0 top-0 bottom-0 border-r border-border-soft bg-surface-1/50 backdrop-blur-xl z-30 flex-col">
         <SidebarContent />
       </aside>
 
@@ -213,7 +237,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-[240px] flex flex-col min-h-screen w-full">
+      <div className="flex-1 lg:ml-[240px] flex flex-col min-h-screen w-full relative z-10">
         {/* Topbar */}
         <header className="h-14 fixed top-0 right-0 left-0 lg:left-[240px] bg-bg/80 backdrop-blur-md border-b border-border-soft z-20 flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-3">
@@ -228,25 +252,33 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
             {/* Commandment 2: Visibility (Global Sync Status) */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-safe/10 border border-safe/20 shadow-[0_0_12px_rgba(52,211,153,0.1)] group/sync cursor-default hover:bg-safe/15 transition-all">
-              <div className="w-2 h-2 rounded-full bg-safe animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
+              <div className={cn(
+                "w-2 h-2 rounded-full bg-safe shadow-[0_0_10px_rgba(52,211,153,0.6)]",
+                syncStatus === 'syncing' ? "animate-pulse" : ""
+              )} />
               <div className="flex flex-col">
                 <span className="text-[9px] font-mono font-bold text-safe uppercase tracking-widest leading-none">Signals Live</span>
-                <span className="text-[8px] text-safe/70 font-medium">SYNCED 2M AGO</span>
+                <span className="text-[8px] text-safe/70 font-medium">
+                  {syncStatus === 'syncing' ? 'SYNCING...' : 'SYNCED JUST NOW'}
+                </span>
               </div>
               <button
                 onClick={() => toast.success('Sync triggered — next update in ~30s')}
                 className="ml-2 p-1 rounded hover:bg-safe/20 text-safe transition-colors" title="Sync Now"
               >
-                <RefreshCw className="w-2.5 h-2.5 group-hover/sync:rotate-180 transition-transform duration-500" />
+                <RefreshCw className={cn(
+                  "w-2.5 h-2.5 transition-transform duration-500",
+                  syncStatus === 'syncing' ? "rotate-180" : "group-hover/sync:rotate-180"
+                )} />
               </button>
             </div>
 
-            <div className="hidden lg:flex items-center gap-2 text-[11px] font-medium tracking-tight text-text-secondary ml-3 border-l border-white/10 pl-4">
-              <span className="text-text-primary">{topbarWorkspaceName}</span>
+            <div className="hidden lg:flex items-center gap-2 text-[11px] font-medium tracking-tight text-text-secondary ml-3 border-l border-white/10 pl-4 truncate max-w-[200px] xl:max-w-none">
+              <span className="text-text-primary truncate">{topbarWorkspaceName}</span>
               <span className="text-text-secondary opacity-30">/</span>
-              <span className="text-text-primary">Dashboard</span>
+              <span className="text-text-primary truncate">Dashboard</span>
               <span className="text-text-secondary opacity-30">/</span>
-              <span className="text-text-secondary">Brief</span>
+              <span className="text-text-secondary truncate">Brief</span>
             </div>
           </div>
 
@@ -311,13 +343,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className={cn(
-          "flex-1 mt-14 relative overflow-x-hidden",
+          "flex-1 mt-14 relative",
           view === 'graph' ? "p-0 overflow-hidden" : "p-4 lg:p-8"
         )}>
-          {view !== 'graph' && (
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-primary/5 blur-[120px] rounded-full pointer-events-none" />
-          )}
-
           <div className={cn(
             "relative z-10 mx-auto w-full",
             view === 'graph' ? "max-w-none h-[calc(100vh-theme(spacing.14))]" : "max-w-5xl"

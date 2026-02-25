@@ -6,6 +6,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
+    checkAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,6 +16,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         () => !!localStorage.getItem('sentinel_token')
     );
     const navigate = useNavigate();
+
+    const checkAuth = useCallback(() => {
+        setIsAuthenticated(!!localStorage.getItem('sentinel_token'));
+    }, []);
 
     const login = useCallback(async (email: string, password: string) => {
         // We use <any> here so TypeScript doesn't complain about snake_case vs camelCase
@@ -45,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [navigate]);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, login, logout, checkAuth }}>
             {children}
         </AuthContext.Provider>
     );

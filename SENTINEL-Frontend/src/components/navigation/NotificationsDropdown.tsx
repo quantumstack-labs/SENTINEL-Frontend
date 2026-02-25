@@ -15,14 +15,14 @@ export default function NotificationsDropdown({ onClose }: NotificationsDropdown
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="absolute top-12 right-0 w-80 z-50 shadow-2xl origin-top-right"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="absolute top-12 right-0 w-80 z-50 origin-top-right"
         >
-            <div className="glass-frosted border border-white/10 p-0 overflow-hidden rounded-2xl shadow-2xl">
-                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/[0.03] glass-shine">
+            <div className="absolute inset-0 glass-frosted rounded-2xl border border-white/10 shadow-2xl" />
+            <div className="relative p-0 overflow-hidden rounded-2xl w-full">
+                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/[0.03]">
                     <h3 className="text-sm font-semibold text-text-primary">
                         Notifications
                         {unreadCount > 0 && (

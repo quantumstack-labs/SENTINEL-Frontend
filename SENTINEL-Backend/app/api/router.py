@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.api import auth, dashboard, commitments, integrations, team, notifications, settings, internal_cron
+from app.api.endpoints import github
 
 router = APIRouter(prefix="/api/v1")
 

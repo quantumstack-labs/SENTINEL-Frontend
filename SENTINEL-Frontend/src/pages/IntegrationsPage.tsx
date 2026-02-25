@@ -82,8 +82,18 @@ export default function IntegrationsPage() {
   const integrationMap = new Map(
     (dbIntegrations ?? []).map(i => [i.id, i])
   );
+
+  // GitHub is only truly connected if it has a real token stored
+  const isGithubReallyConnected = (() => {
+    const gh = integrationMap.get('github');
+    return gh?.status === 'connected' && !!gh?.github_access_token;
+  })();
+
   const connectedIds = new Set(
-    (dbIntegrations ?? []).filter(i => i.status === 'connected').map(i => i.id)
+    (dbIntegrations ?? []).filter(i => {
+      if (i.id === 'github') return isGithubReallyConnected;
+      return i.status === 'connected';
+    }).map(i => i.id)
   );
   const connectedCount = connectedIds.size;
   const capacity = Math.round((connectedCount / SUPPORTED_APPS.length) * 100);
@@ -128,7 +138,9 @@ export default function IntegrationsPage() {
       toast.error('Please log in first');
       return;
     }
-    window.location.href = `http://localhost:8000/api/integrations/oauth/authorize?token=${encodeURIComponent(token)}`;
+    // Unified Backend router: /api/v1/integrations/github/oauth/authorize
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    window.location.href = `${apiBase}/integrations/github/oauth/authorize?token=${encodeURIComponent(token)}`;
   };
 
   const handleGmailConnect = () => {

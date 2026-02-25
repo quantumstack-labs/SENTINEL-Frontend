@@ -39,15 +39,15 @@ export default function UserMenu({ onClose }: UserMenuProps) {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="absolute top-12 right-0 w-72 z-50 shadow-2xl origin-top-right"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="absolute top-12 right-0 w-64 z-50 origin-top-right"
         >
-            <div className="glass-frosted border border-white/10 p-0 overflow-hidden rounded-2xl shadow-2xl">
+            <div className="absolute inset-0 glass-frosted rounded-2xl border border-white/10 shadow-2xl" />
+            <div className="relative p-0 overflow-hidden rounded-2xl w-full">
                 {/* Profile Header */}
-                <div className="p-4 bg-white/[0.03] border-b border-white/10 glass-shine">
+                <div className="p-4 bg-white/[0.03] border-b border-white/10">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-primary to-orange-600 flex items-center justify-center text-bg font-bold text-base shadow-lg shadow-amber-primary/20">
                             {initials}
@@ -114,6 +114,6 @@ export default function UserMenu({ onClose }: UserMenuProps) {
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </motion.div >
     );
 }

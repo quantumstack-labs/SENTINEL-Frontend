@@ -66,6 +66,8 @@ create table if not exists integrations (
     description text not null default '',
     slack_bot_token text,
     gmail_access_token text,
+    gmail_refresh_token text,
+    github_access_token text,
     primary key (id, workspace_id)
 );
 
@@ -106,6 +108,7 @@ cross join (values
     ('notion',           'Notion',             'Connect shared Notion docs and project pages'),
     ('jira',             'Jira',               'Sync sprint issues and track delivery risk'),
     ('linear',           'Linear',             'Import Linear issues and cycle commitments'),
-    ('microsoft',        'Microsoft Teams',    'Monitor Teams channels for commitments')
+    ('microsoft',        'Microsoft Teams',    'Monitor Teams channels for commitments'),
+    ('github',           'GitHub',             'Link pull requests and issues to commitments')
 ) as t(integration_id, integration_name, integration_desc)
 on conflict (id, workspace_id) do nothing;

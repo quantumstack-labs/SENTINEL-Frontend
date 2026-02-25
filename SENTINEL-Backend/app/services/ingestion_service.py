@@ -85,9 +85,9 @@ def _resolve_owner_id(owner_email: str | None, email_index: dict[str, str]) -> s
     normalized = owner_email.strip().lower()
     user_id = email_index.get(normalized)
     if user_id:
-        print(f"  [Pipeline] ✓ Matched owner email '{normalized}' → user_id {user_id}")
+        print(f"  [Pipeline] [OK] Matched owner email '{normalized}' → user_id {user_id}")
     else:
-        print(f"  [Pipeline] ✗ No DB user found for email '{normalized}' — owner_id will be None")
+        print(f"  [Pipeline] [FAIL] No DB user found for email '{normalized}' — owner_id will be None")
     return user_id
 
 async def _run_for_workspace(workspace_id: str, workspace: dict):
@@ -166,7 +166,7 @@ async def _run_for_workspace(workspace_id: str, workspace: dict):
                 "resolved": False,
             }
 
-            print(f"  [Pipeline] ✓ Saving: \"{description[:60]}\" (owner_id={owner_id})")
+            print(f"  [Pipeline] [OK] Saving: \"{description[:60]}\" (owner_id={owner_id})")
             print("  [Pipeline]   Writing to Supabase...")
             queries.upsert_commitment(workspace_id, commitment_data)
             new_saved += 1
@@ -203,4 +203,4 @@ async def _run_for_workspace(workspace_id: str, workspace: dict):
             },
         )
 
-    print(f"  [Pipeline] ✓ Workspace '{workspace.get('name')}' done.")
+    print(f"  [Pipeline] [OK] Workspace '{workspace.get('name')}' done.")

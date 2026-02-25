@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster } from 'react-hot-toast';
 import DemoNav from './navigation/DemoNav';
+import { useAuth } from '@/context/AuthContext';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,11 +11,10 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const isLanding = location.pathname === '/';
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden selection:bg-amber-primary/30 selection:text-amber-primary">
-      <Toaster 
+    <div className="min-h-screen relative selection:bg-amber-primary/30 selection:text-amber-primary">
+      <Toaster
         position="top-center"
         toastOptions={{
           style: {
@@ -31,23 +31,6 @@ export default function Layout({ children }: LayoutProps) {
           },
         }}
       />
-      
-      <DemoNav />
-
-      {/* Ambient Background System */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Primary Ambient Glow - Changes based on page */}
-        <div 
-          className={`absolute transition-all duration-1000 ease-in-out rounded-full blur-[120px] opacity-40
-            ${isLanding 
-              ? 'top-1/4 -right-20 w-[600px] h-[600px] bg-amber-primary/20' 
-              : 'top-[-100px] left-[-100px] w-[400px] h-[400px] bg-amber-primary/10'
-            }`}
-        />
-        
-        {/* Secondary subtle glow for depth */}
-        <div className="absolute bottom-0 left-1/3 w-[800px] h-[300px] bg-amber-primary/5 blur-[100px] rounded-full opacity-20" />
-      </div>
 
       {/* Content */}
       <div className="relative z-10">
@@ -63,6 +46,8 @@ export default function Layout({ children }: LayoutProps) {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <DemoNav />
     </div>
   );
 }

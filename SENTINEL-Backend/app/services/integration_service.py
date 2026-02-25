@@ -17,6 +17,9 @@ def get_integrations(workspace_id: str) -> list[IntegrationOut]:
                 channels=row.get("channels"),
                 last_synced=row.get("last_synced_at"),
                 description=row.get("description", ""),
+                github_access_token=row.get("github_access_token"),
+                slack_bot_token=row.get("slack_bot_token"),
+                gmail_access_token=row.get("gmail_access_token"),
             )
         )
     return result
@@ -43,7 +46,7 @@ def _discover_slack_channels(token: str) -> list[str]:
             for ch in response.get("channels", []):
                 if ch.get("is_member"):
                     channel_ids.append(ch["id"])
-                    print(f"  [Slack Connect] ✓ Bot is a member of: #{ch.get('name')} ({ch['id']})")
+                    print(f"  [Slack Connect] [OK] Bot is a member of: #{ch.get('name')} ({ch['id']})")
 
             next_cursor = response.get("response_metadata", {}).get("next_cursor", "")
             if not next_cursor:
@@ -51,7 +54,7 @@ def _discover_slack_channels(token: str) -> list[str]:
             cursor = next_cursor
 
         if not channel_ids:
-            print("[Slack Connect] ⚠ Bot is not a member of any channels.")
+            print("[Slack Connect] [WARN] Bot is not a member of any channels.")
             print("  → In Slack, go to any channel and type: /invite @YourBotName")
             print("  → Then reconnect from the Integrations page.")
 
@@ -59,7 +62,7 @@ def _discover_slack_channels(token: str) -> list[str]:
         return channel_ids
 
     except Exception as exc:
-        print(f"[Slack Connect] ✗ Channel discovery failed: {type(exc).__name__}: {exc}")
+        print(f"[Slack Connect] [FAIL] Channel discovery failed: {type(exc).__name__}: {exc}")
         return []
 
 
@@ -75,7 +78,7 @@ def connect_integration(integration_id: str, workspace_id: str, credentials: dic
             channel_ids = _discover_slack_channels(token)
             extra["channels"] = channel_ids
         else:
-            print("[Slack Connect] ✗ No SLACK_BOT_TOKEN found in credentials or .env — cannot auto-discover channels.")
+            print("[Slack Connect] [FAIL] No SLACK_BOT_TOKEN found in credentials or .env — cannot auto-discover channels.")
 
     row = queries.update_integration_status(workspace_id, integration_id, "connected", extra)
     return IntegrationOut(
@@ -87,6 +90,9 @@ def connect_integration(integration_id: str, workspace_id: str, credentials: dic
         channels=row.get("channels"),
         last_synced=row.get("last_synced_at"),
         description=row.get("description", ""),
+        github_access_token=row.get("github_access_token"),
+        slack_bot_token=row.get("slack_bot_token"),
+        gmail_access_token=row.get("gmail_access_token"),
     )
 
 
@@ -150,7 +156,7 @@ def fetch_slack_channels(workspace_id: str) -> list[dict]:
     except ValueError:
         raise
     except Exception as exc:
-        print(f"[Slack Channels] ✗ Failed to fetch: {type(exc).__name__}: {exc}")
+        print(f"[Slack Channels] [FAIL] Failed to fetch: {type(exc).__name__}: {exc}")
         raise ValueError(f"Failed to fetch Slack channels: {exc}")
 
 
@@ -162,6 +168,6 @@ def save_slack_channels(workspace_id: str, channel_ids: list[str]) -> dict:
         "connected",
         {"channels": channel_ids},
     )
-    print(f"[Slack Channels] ✓ Saved {len(channel_ids)} channel(s) for workspace {workspace_id}: {channel_ids}")
+    print(f"[Slack Channels] [OK] Saved {len(channel_ids)} channel(s) for workspace {workspace_id}: {channel_ids}")
     return {"saved": True, "channel_count": len(channel_ids)}
 

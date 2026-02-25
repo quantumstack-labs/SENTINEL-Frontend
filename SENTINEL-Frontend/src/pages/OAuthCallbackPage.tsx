@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * This page handles the redirect from the backend after Google OAuth.
@@ -10,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 export default function OAuthCallbackPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { checkAuth } = useAuth();
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -18,12 +20,13 @@ export default function OAuthCallbackPage() {
         if (token) {
             localStorage.setItem('sentinel_token', token);
             // Small delay so AuthContext picks up the new token
+            checkAuth();
             navigate('/dashboard', { replace: true });
         } else {
             setError('Authentication failed — no token received from the server.');
             setTimeout(() => navigate('/login', { replace: true }), 3000);
         }
-    }, [searchParams, navigate]);
+    }, [searchParams, navigate, checkAuth]);
 
     return (
         <div className="min-h-screen flex items-center justify-center">

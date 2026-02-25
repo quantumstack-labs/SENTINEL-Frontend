@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Activity, Github, Chrome, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { Logo } from '@/components/brand/Logo';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -34,10 +35,7 @@ export default function LoginPage() {
         <div className="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] bg-amber-primary/5 blur-[120px] rounded-full" />
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-2 mb-12">
-            <div className="w-8 h-8 rounded-full bg-amber-primary/20 border border-amber-primary/50 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-amber-primary shadow-[0_0_10px_rgba(245,166,35,0.5)]" />
-            </div>
-            <span className="font-display font-semibold text-xl tracking-tight text-text-primary">Sentinel</span>
+            <Logo size="md" />
           </Link>
           <h2 className="font-display text-5xl leading-tight mb-6">
             See the <span className="text-amber-primary italic">future</span> of your engineering stack.

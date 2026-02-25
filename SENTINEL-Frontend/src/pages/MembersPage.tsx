@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useTeamMembers } from '@/hooks/useData';
 import { GlassCard } from '@/components/glass/GlassCard';
 import { cn } from '@/lib/utils';
-import { Mail, Shield, Trash2, UserPlus, Zap, Settings, Loader2, X, ChevronRight } from 'lucide-react';
+import { Mail, Shield, Trash2, UserPlus, Zap, Settings, Loader2, X, ChevronRight, ChevronDown } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -14,6 +14,13 @@ export default function MembersPage() {
     const [showInvite, setShowInvite] = useState(false);
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('member');
+    const [isRoleOpen, setIsRoleOpen] = useState(false);
+
+    const roles = [
+        { id: 'member', label: 'Member' },
+        { id: 'admin', label: 'Admin' },
+        { id: 'observer', label: 'Observer' }
+    ];
 
     const inviteMutation = useMutation({
         mutationFn: () => api.post('/team/members/invite', { email, role }),
@@ -75,17 +82,41 @@ export default function MembersPage() {
                                     className="w-full h-11 rounded-xl border border-white/10 bg-bg/50 px-4 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-amber-primary/50 transition-all"
                                 />
                             </div>
-                            <div className="w-full md:w-48 space-y-2">
+                            <div className="w-full md:w-48 space-y-2 relative">
                                 <label className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest ml-1">Access Level</label>
-                                <select
-                                    value={role}
-                                    onChange={(e) => setRole(e.target.value)}
-                                    className="w-full h-11 rounded-xl border border-white/10 bg-bg/50 px-4 text-sm text-text-primary focus:outline-none transition-all"
-                                >
-                                    <option value="member">Member</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="observer">Observer</option>
-                                </select>
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRoleOpen(!isRoleOpen)}
+                                        className="w-full h-11 rounded-xl border border-white/10 bg-bg/50 px-4 text-sm text-text-primary flex items-center justify-between hover:bg-white/5 transition-all text-left"
+                                    >
+                                        <span className="capitalize">{role}</span>
+                                        <ChevronDown className={cn("w-4 h-4 text-text-tertiary transition-transform", isRoleOpen && "rotate-180")} />
+                                    </button>
+
+                                    {isRoleOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={() => setIsRoleOpen(false)} />
+                                            <div className="absolute top-full left-0 right-0 mt-2 z-50 glass-frosted rounded-xl border border-white/10 shadow-2xl overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
+                                                {roles.map((r) => (
+                                                    <button
+                                                        key={r.id}
+                                                        onClick={() => {
+                                                            setRole(r.id);
+                                                            setIsRoleOpen(false);
+                                                        }}
+                                                        className={cn(
+                                                            "w-full px-4 py-2.5 text-sm text-left transition-colors hover:bg-white/5",
+                                                            role === r.id ? "text-amber-primary font-bold bg-amber-primary/5" : "text-text-secondary"
+                                                        )}
+                                                    >
+                                                        {r.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <button
                                 onClick={() => inviteMutation.mutate()}

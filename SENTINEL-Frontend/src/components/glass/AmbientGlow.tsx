@@ -1,3 +1,4 @@
+import React from 'react';
 import { cn } from '@/lib/utils';
 
 type GlowColor = 'amber' | 'red' | 'green';
@@ -24,7 +25,7 @@ export function AmbientGlow({
   style,
 }: AmbientGlowProps) {
   const colorBase = glowColors[color];
-  
+
   return (
     <div
       aria-hidden="true"

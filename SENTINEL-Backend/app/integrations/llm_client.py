@@ -104,30 +104,30 @@ async def extract_commitments(messages: list) -> list[dict]:
                 wait = 2 ** attempt
                 print(f"  [LLM] Groq error (attempt {attempt+1}/3): {exc}. Retrying in {wait}s...")
                 time.sleep(wait)
-        print(f"  [LLM] ✗ All Groq retries exhausted: {last_exc}")
+        print(f"  [LLM] [FAIL] All Groq retries exhausted: {last_exc}")
         return ""
 
     try:
         raw_text = await asyncio.get_event_loop().run_in_executor(None, _call_groq)
     except Exception as exc:
-        print(f"  [LLM] ✗ Executor error: {exc}")
+        print(f"  [LLM] [FAIL] Executor error: {exc}")
         return []
 
     if not raw_text:
-        print("  [LLM] ✗ Empty response from Groq.")
+        print("  [LLM] [FAIL] Empty response from Groq.")
         return []
 
     try:
         parsed = json.loads(raw_text)
         results = parsed.get("commitments", [])
         if not isinstance(results, list):
-            print(f"  [LLM] ✗ 'commitments' field is not a list: {type(results)}")
+            print(f"  [LLM] [FAIL] 'commitments' field is not a list: {type(results)}")
             return []
-        print(f"  [LLM] ✓ Extracted {len(results)} commitment(s).")
+        print(f"  [LLM] [OK] Extracted {len(results)} commitment(s).")
         for i, c in enumerate(results):
             print(f"    [{i+1}] \"{c.get('description', '')}\" | owner={c.get('owner_email') or c.get('owner_name')} | channel={c.get('source_channel')} | confidence={c.get('confidence')} | due={c.get('due_date')}")
         return results
     except json.JSONDecodeError as exc:
-        print(f"  [LLM] ✗ Failed to parse JSON: {exc}")
+        print(f"  [LLM] [FAIL] Failed to parse JSON: {exc}")
         print(f"  [LLM]   Raw response: {raw_text[:500]}")
         return []

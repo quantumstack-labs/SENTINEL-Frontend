@@ -42,6 +42,17 @@ function DashboardContent() {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
   }).format(new Date());
 
+  // Get dynamic greeting based on time
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    if (hour < 22) return "Good evening";
+    return "Good night";
+  };
+
+  const greeting = getGreeting();
+
   // Extract the first name of the logged-in admin (Fallback to "there" if missing)
   const currentUser = members && members.length > 0 ? members[0].name.split(' ')[0] : 'there';
 
@@ -50,9 +61,6 @@ function DashboardContent() {
       "relative",
       view !== 'graph' && "space-y-8"
     )}>
-      {/* Ambient Glow for Dashboard */}
-      <AmbientGlow color="amber" size={800} opacity={0.05} className="-top-[200px] -left-[200px]" />
-
       {/* Header Section */}
       {view !== 'graph' && (
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -61,7 +69,7 @@ function DashboardContent() {
               {today} {/* <-- Replaced hardcoded date */}
             </div>
             <h1 className="font-display text-3xl font-bold text-text-primary">
-              Good morning, {currentUser}. <span className="text-2xl">👋</span> {/* <-- Replaced Arjun */}
+              {greeting}, {currentUser}. <span className="text-2xl">👋</span> {/* <-- Replaced Static Greeting */}
             </h1>
           </div>
 

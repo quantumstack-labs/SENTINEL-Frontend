@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = ""
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
-    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/integrations/oauth/callback"
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/integrations/github/oauth/callback"
     GMAIL_REDIRECT_URI: str = "http://localhost:8000/api/v1/integrations/gmail/oauth/callback"
 
 

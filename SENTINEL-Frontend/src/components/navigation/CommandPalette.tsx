@@ -9,6 +9,7 @@ import {
     RefreshCw, Bell, Plus, Shield, Cpu
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { Logo } from '../brand/Logo';
 
 interface CommandItem {
     id: string;
@@ -37,8 +38,18 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
         }
     }, [selectedIndex]);
 
+    const getBriefLabel = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Morning Brief";
+        if (hour < 17) return "Afternoon Brief";
+        if (hour < 22) return "Evening Brief";
+        return "Night Brief";
+    };
+
+    const briefLabel = getBriefLabel();
+
     const commands: CommandItem[] = [
-        { id: 'brief', icon: LayoutDashboard, label: 'Daily Brief', description: 'View signals and intelligence summary', category: 'Views', action: () => { navigate('/dashboard'); setView('brief'); onClose(); }, shortcut: 'G B' },
+        { id: 'brief', icon: LayoutDashboard, label: briefLabel, description: 'View signals and intelligence summary', category: 'Views', action: () => { navigate('/dashboard'); setView('brief'); onClose(); }, shortcut: 'G B' },
         { id: 'graph', icon: Network, label: 'Dependency Graph', description: 'Explore visual signal network', category: 'Views', action: () => { navigate('/dashboard'); setView('graph'); onClose(); }, shortcut: 'G G' },
         { id: 'commitments', icon: ListTodo, label: 'Commitments', description: 'Review team deliverables', category: 'Views', action: () => { navigate('/dashboard'); setView('table'); onClose(); }, shortcut: 'G C' },
 
@@ -129,7 +140,7 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
                 className="w-full max-w-xl glass-frosted rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10"
             >
                 {/* Search Input */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-white/[0.03] border-b border-white/10 glass-shine">
+                <div className="flex items-center gap-3 px-4 py-3 bg-white/[0.03] border-b border-white/10">
                     <Search className="w-5 h-5 text-amber-primary" />
                     <input
                         autoFocus
@@ -259,9 +270,9 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
                             <span>Select</span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] font-mono text-text-tertiary opacity-40">
-                        <Command className="w-3 h-3" />
-                        <span>SENTINEL PULSE</span>
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-text-tertiary">
+                        <Logo variant="icon" size="sm" />
+                        <span className="opacity-40">SENTINEL PULSE</span>
                     </div>
                 </div>
             </motion.div>

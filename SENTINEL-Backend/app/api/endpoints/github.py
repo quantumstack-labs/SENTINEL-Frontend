@@ -11,7 +11,7 @@ from app.integrations.github_client import GitHubClient
 from app.db import queries
 from app.config import settings
 
-router = APIRouter(tags=["GitHub"])
+router = APIRouter(prefix="/integrations/github", tags=["GitHub"])
 
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "")
 
@@ -60,7 +60,7 @@ async def github_webhook(
         integration = result.data[0] if result.data else None
 
         if integration:
-            client = GitHubClient(integration["access_token"])
+            client = GitHubClient(integration["github_access_token"])
             background_tasks.add_task(
                 client.sync_repository_signals,
                 repo_name,
@@ -102,7 +102,7 @@ async def github_oauth_authorize(token: str = ""):
         "state": workspace_id,  
     }
     url = f"https://github.com/login/oauth/authorize?{urlencode(params)}"
-    return RedirectResponse(url)
+    return RedirectResponse(url, status_code=302)
 
 
 @router.get("/oauth/callback")
@@ -130,7 +130,7 @@ async def github_oauth_callback(code: str, state: str = ""):
 
     if not access_token:
         error = data.get("error_description") or data.get("error", "unknown_error")
-        print(f"[GitHub OAuth] ✗ Token exchange failed: {error}")
+        print(f"[GitHub OAuth] [FAIL] Token exchange failed: {error}")
         raise HTTPException(status_code=400, detail=f"GitHub OAuth failed: {error}")
 
    
@@ -146,14 +146,14 @@ async def github_oauth_callback(code: str, state: str = ""):
     except Exception:
         pass  
 
-    print(f"[GitHub OAuth] ✓ Token obtained for user: {github_username or 'unknown'}")
+    print(f"[GitHub OAuth] [OK] Token obtained for user: {github_username or 'unknown'}")
 
    
     queries.update_integration_status(workspace_id, "github", "connected", {
-        "access_token": access_token,
+        "github_access_token": access_token,
         "connected_account": github_username,
     })
 
    
     frontend_url = settings.FRONTEND_URL.rstrip("/")
-    return RedirectResponse(f"{frontend_url}/dashboard/integrations?github=connected")
+    return RedirectResponse(f"{frontend_url}/dashboard/integrations?github=connected", status_code=302)
