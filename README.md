@@ -39,6 +39,7 @@
 ## 🎬 Demo
 
 > **Watch Sentinel in action — commitment extraction, risk scoring, and smart alerts.**
+![Sentinel Demo](docs/assets/SENTINEL.mp4)
 
 <p align="center">
   <video src="docs/assets/SENTINEL.mp4" controls width="100%" style="border-radius:12px; max-width:900px;">
