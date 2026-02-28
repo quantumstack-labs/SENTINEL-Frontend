@@ -26,8 +26,26 @@
 | 💊 **Operational Health Pill** | Scroll-aware navigation companion that intelligently hides/focuses |
 | 🔔 **Smart Alerts** | Real-time identification of project blockers and risks |
 | 🔗 **Integrations** | Seamless connections to Slack, Gmail, GitHub, Jira, and more |
-| 👥 **Team Management** | Granular workspace member access control |
+ZM|
+## 📹 Demo Video
 
+https://github.com/user/repo/blob/main/docs/assets/SENTINEL.mp4
+
+---
+
+## 🖼️ Screenshots
+
+### Dashboard
+![Dashboard](docs/assets/Dashboard.png)
+
+### Dependency Graph
+![Dependency Graph](docs/assets/Dependency%20Graph%20Page.png)
+
+### Commitments
+![Commitments](docs/assets/Commitment%20Page.png)
+
+### Integrations
+![Integrations](docs/assets/Integration%20Page.png)
 ---
 
 ## 🛠️ Technology Stack
@@ -132,9 +150,10 @@ SENTINEL/
 │   │   ├── models/             # Data models
 │   │   ├── integrations/       # External integrations
 │   │   └── db/                 # Database utilities
-│   └── requirements.txt
+HJ|├── docs/                        # Documentation & assets
+│   └── assets/                     # Images & videos
 │
-└── README.md                   # This file
+└── README.md                       # This file
 ```
 
 ---
@@ -178,9 +197,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-<div align="center">
-  <p>Built with ❤️ QuantumStacks Lab/p>
-  <p>
+BN|  <p>Built with ❤️ by the Sentinel Intelligence Team</p>
     <a href="https://github.com/your-org/sentinel/issues">Issues</a> •
     <a href="https://github.com/your-org/sentinel/discussions">Discussions</a> •
     <a href="https://github.com/your-org/sentinel">Repository</a>
